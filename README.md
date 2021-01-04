@@ -52,7 +52,7 @@ Go ahead and compress the sample 1MB FASTQ file. Save the resulting `_data.rfq.x
 ```bash
 ./repaq -d -i _data.rfq.xz -o _data.fastq
 curl -O localhost:12380/1MB.fastq
-diff _data.fastq 1MB.fastq
+cmp _data.fastq 1MB.fastq
 ```
 
 # A sample implementation
