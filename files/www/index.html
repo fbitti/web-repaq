@@ -1,0 +1,119 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Web Repaq</title>
+  <meta name="description" content="Web Repaq">
+
+    <!-- Just a bit of styling -->
+    <style type="text/css">
+        #input { width: 50%; height: 200px; }
+        #output { width: 50%; height: 200px; }
+    </style>
+</head>
+<body>
+    <!-- Basic UI for repaq -->
+    <br/>
+    <h4 id="instructions">
+Wait while 1MB of FASTQ data is loading...
+    </h4>
+    <br/>
+    <input id="btnCompress" type="button" value="Compress fastQ file" disabled>
+    <input id="btnSave" type="button" value="Save rfq.xz file" disabled>
+    <br/><br/>
+    <textarea id="output" readonly></textarea>
+
+    <!-- The main logic-->
+    <script type="text/javascript">
+
+        var fastqFileBlob = null;
+        var compressing = false;
+        var compressedFileBlobURL = null;
+        var worker = new Worker("worker.js"); 
+
+        document.getElementById("output").value += `Web Repaq is starting...\n`;
+
+        // WebAssembly module config
+        var output = [];
+        var Module = {
+            // Don't automatically run main() function on page load
+            noInitialRun: true,
+            // Print functions (capture wasm output)
+            print: stdout => output = stdout,
+            printErr: stderr => console.warn(stderr),
+            // When the module is ready, enable the "Run" button
+            onRuntimeInitialized: function () {
+                worker.onmessage = msg => {
+                    console.log("[Main thread] The worker sent this message:", msg.data);
+                    compressedFileBlobURL = msg.data.blobURL;
+                    document.getElementById("btnSave").disabled = false;
+                    document.getElementById("output").value += `Finished compression!\n`;
+                    document.getElementById("output").value += `repaq took ` + msg.data.repaqDuration + `s\n`;
+                    document.getElementById("output").value += `xz took ` + msg.data.XZDuration + `s\n`;
+                }
+                var httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function (data) {
+                    document.getElementById("output").value += `Loading data!\n`;
+                    document.getElementById("btnCompress").disabled = false;
+                    document.getElementById("instructions").innerHTML = "1MB fastQ file loaded! Click Compress to run repaq.\n";
+                }
+                httpRequest.open('GET', "1MB.fastq");
+                httpRequest.responseType = 'blob'; 
+                httpRequest.onload = function() {
+                    if (this.status == 200) {
+                        fastqFileBlob = this.response;
+                        document.getElementById("output").value += `The fastQ file is now available for compression.\n`;
+                    } else {
+                        document.getElementById("output").value += `Failed to load fastQ file, http status is `+ this.status + `.\n`;
+                    }
+                };
+                httpRequest.onerror = function() {
+                    document.getElementById("output").value += `Failed to load fastQ file.\n`;
+                };
+                httpRequest.send();
+            }
+        };
+
+        // Compress the sample fastQ file
+
+        document.getElementById("btnCompress").onclick = function () {
+            console.log("You clicked compress");
+            var date = new Date(); 
+            var timestamp = date.toTimeString().split(' ')[0];
+            // Run repaq and update the output textarea
+            document.getElementById("output").value += `Compression started @ ${timestamp}\n`;
+
+            if (fastqFileBlob) {
+                worker.postMessage(fastqFileBlob);
+                compressing = true;
+                delete fastqFileBlob;
+                document.getElementById("btnCompress").disabled = true;
+            }
+        }
+
+        // Save the resulting file in your computer
+        document.getElementById("btnSave").onclick = function () {
+            console.log("You clicked save.");
+            document.getElementById("btnSave").disabled = true;
+
+            document.getElementById("output").value += `Offering download of /data.rfq.xz\n`;
+            let filename = '/data.rfq.xz';
+        
+            var a = document.createElement('a');
+            a.download = filename;
+            a.href = compressedFileBlobURL;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+        
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+            }, 20000);
+        };
+
+    </script>
+    <!-- Load the integrated repaq + xz Emscripten module -->
+    <script src="main-module.js"></script>
+</body>
+</html>

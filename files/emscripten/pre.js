@@ -1,0 +1,3 @@
+Module['dynamicLibraries'] = [
+        'repaq.wasm'
+];
