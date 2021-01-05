@@ -29,7 +29,7 @@ xz -z -k data.rfq
 ```
 
 # Instructions
-This repo provides a Dockerfile which compiles repaq to wasm and even serves a simple website, with a sample FASTQ website.
+This repo provides a Dockerfile which compiles repaq to wasm and even serves a simple website, with a sample FASTQ file.
 
 The reason I chose to do it by docker is because the emscripten project already provides a working container at https://hub.docker.com/u/emscripten, which simplifies your life as you do not need to install emscripten from scratch.
 
@@ -73,7 +73,7 @@ However, honestly I couldn't do it alone, so I must give credits to a few people
 - [Robert Aboukhalil](https://github.com/robertaboukhalil): all of this started when I did Robert's course on WebAssembly, available on https://www.levelupwasm.com/ (not an affiliate link), it gave me the experience of porting multiple tools, starting from the simplest ones, which was a fundamental head start when trying to port a more complex project like this one.
 Here is where you may see more bioinformatics tools ported by Robert to wasm: https://cdn.biowasm.com/
 
-- [Alon Zakai](https://github.com/kripken) and [wilkie](https://github.com/wilkie)
+- [Alon Zakai](https://github.com/kripken) and [wilkie](https://github.com/wilkie):
 Back in July, 2020, I was facing my last roadblock to complete this project, and decided to ask the emscripten community, as you may see here: 
 https://github.com/emscripten-core/emscripten/issues/11621.
 
