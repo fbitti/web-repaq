@@ -1,6 +1,5 @@
 FROM emscripten/emsdk:2.0.9
 LABEL maintainer="https://github.com/fbitti"
-VOLUME /Users/fbittiloureiro/proyectos/emscripten/autodeploy
 WORKDIR /src
 RUN apt update
 RUN apt -y upgrade
