@@ -41,7 +41,6 @@ git clone https://github.com/fbitti/web-repaq.git
 cd web-repaq
 docker build -t web-repaq .
 docker run -dt --name web-repaq -p 12380:80 web-repaq
-docker exec -it web-repaq service nginx start
 ```
 
 The `docker build` step takes several minutes, so be patient.
